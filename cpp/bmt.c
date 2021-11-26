@@ -2,6 +2,8 @@
 // Created by gen on 11/19/21.
 //
 
+#ifdef __ANDROID__
+
 #include <jni.h>
 
 JavaVM* bmt_vm = NULL;
@@ -35,8 +37,6 @@ void bmt_sendEvent(const char *name, const char *data) {
     }
 }
 
-//void bmt_
-
 jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     bmt_vm = vm;
     return JNI_VERSION_1_6;
@@ -45,3 +45,17 @@ jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 void JNI_OnUnload(JavaVM *vm, void *reserved) {
     bmt_vm = NULL;
 }
+
+#else
+
+#include <objc/runtime.h>
+
+typedef void (*IMP_sendEvent)(Class, SEL, const char *name, const char *data);
+
+extern void bmt_sendEvent(const char *name, const char *data) {
+    Class NativeMainThreadPlugin = objc_getClass("NativeMainThreadPlugin");
+    SEL sel = sel_registerName("sendEvent:withData:");
+    IMP_sendEvent imp = (IMP_sendEvent)class_getMethodImplementation(NativeMainThreadPlugin, sel);
+    imp(NativeMainThreadPlugin, sel, name, data);
+}
+#endif
