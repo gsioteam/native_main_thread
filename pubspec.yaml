@@ -1,5 +1,5 @@
 name: native_main_thread
-description: A new Flutter plugin.
+description: For flutter native plugins, send event to main thread.
 version: 0.0.1
 homepage:
 
